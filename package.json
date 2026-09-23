@@ -1,16 +1,39 @@
 {
-  "name": "fds-storybook-mcp",
+  "name": "@viantotech/mcp-storybook",
   "version": "0.1.0",
-  "description": "Read-only MCP server for authenticated FDS Story Book",
+  "description": "MCP server for browsing and searching Storybook component libraries",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "fds-storybook-mcp": "dist/index.js"
+    "mcp-storybook": "dist/index.js"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "mcp",
+    "storybook",
+    "model-context-protocol",
+    "claude",
+    "ai",
+    "design-system",
+    "components"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/viantotech/mcp-storybook"
+  },
+  "license": "MIT",
   "scripts": {
     "dev": "tsx src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
+    "prepublishOnly": "npm run build",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
@@ -21,11 +44,11 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",
-    "dotenv": "^16.4.7",
     "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/node": "^22.13.10",
+    "dotenv": "^16.4.7",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2",
     "vitest": "^3.0.9"
