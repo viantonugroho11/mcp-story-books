@@ -1,10 +1,4 @@
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-import { config as loadDotenv } from "dotenv";
 import { z } from "zod";
-
-const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
-loadDotenv({ path: resolve(projectRoot, ".env") });
 
 const authTypeSchema = z.enum(["basic", "bearer", "cookie", "oauth", "none"]);
 const dataSourceSchema = z.enum(["auto", "storybook-static", "rest-api"]);
@@ -68,8 +62,8 @@ export type AppConfig = z.infer<typeof configSchema>;
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   const parsed = configSchema.safeParse({
-    baseUrl: env.STORYBOOK_BASE_URL ?? "https://amt-fds-prod.vercel.app",
-    authType: env.STORYBOOK_AUTH_TYPE ?? "basic",
+    baseUrl: env.STORYBOOK_BASE_URL,
+    authType: env.STORYBOOK_AUTH_TYPE ?? "none",
     basicAuthUsername: env.STORYBOOK_BASIC_AUTH_USERNAME,
     basicAuthPassword: env.STORYBOOK_BASIC_AUTH_PASSWORD,
     accessToken: env.STORYBOOK_ACCESS_TOKEN,
