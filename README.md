@@ -1,101 +1,106 @@
-# fds-storybook-mcp
+# @viantotech/mcp-storybook
 
-MCP server **read-only** untuk Story Book FDS di `https://amt-fds-prod.vercel.app/`.
+MCP server for browsing and searching **Storybook** component libraries with authentication support.
 
-Membaca dan mencari konten **Storybook 8 static** (FUNDS-WEB design system) memakai autentikasi sah yang **Anda** konfigurasi (tanpa bypass MFA/SSO/CAPTCHA).
+Reads Storybook 8 static data (`/index.json` + chunk MDX/stories in `/assets/*`).
 
-Data diambil dari `/index.json` + chunk MDX/stories di `/assets/*` (bukan REST `/api/stories`).
-
-## Autentikasi
-
-Saat ini deployment memakai **HTTP Basic Auth** (Vercel). Lihat [DISCOVERY.md](./DISCOVERY.md).
-
-```env
-STORYBOOK_BASE_URL=https://amt-fds-prod.vercel.app
-STORYBOOK_AUTH_TYPE=basic
-STORYBOOK_BASIC_AUTH_USERNAME=
-STORYBOOK_BASIC_AUTH_PASSWORD=
-```
-
-Setelah login edge berhasil, jalankan discovery API:
+## Install
 
 ```bash
-npm run discover
-export STORYBOOK_DISCOVERY_PATH=./discovery-output.json
+npm install -g @viantotech/mcp-storybook
 ```
 
-Override manual endpoint (hanya jika sudah diverifikasi):
-
-```env
-STORYBOOK_API_LIST_STORIES=/api/stories
-STORYBOOK_API_GET_STORY=/api/stories/{storyId}
-STORYBOOK_API_SEARCH=/api/stories/search
-```
-
-## Instalasi
+Or use directly with `npx`:
 
 ```bash
-npm install
-cp .env.example .env
+npx @viantotech/mcp-storybook
 ```
 
-## Development
+## Environment Variables
 
-```bash
-npm run dev
-```
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `STORYBOOK_BASE_URL` | **Yes** | URL of your Storybook deployment |
+| `STORYBOOK_AUTH_TYPE` | No | Auth type: `none` (default), `basic`, `bearer`, `cookie`, `oauth` |
+| `STORYBOOK_BASIC_AUTH_USERNAME` | If basic | Basic auth username |
+| `STORYBOOK_BASIC_AUTH_PASSWORD` | If basic | Basic auth password |
+| `STORYBOOK_ACCESS_TOKEN` | If bearer | Bearer token |
+| `STORYBOOK_SESSION_COOKIE` | If cookie | Session cookie value |
+| `STORYBOOK_CLIENT_ID` | If oauth | OAuth client ID |
+| `STORYBOOK_CLIENT_SECRET` | If oauth | OAuth client secret |
+| `STORYBOOK_REFRESH_TOKEN` | If oauth | OAuth refresh token |
+| `STORYBOOK_DATA_SOURCE` | No | `auto` (default), `storybook-static`, `rest-api` |
+| `CACHE_ENABLED` | No | `true` (default) |
+| `CACHE_TTL` | No | Cache TTL in seconds (default: 300) |
 
-## Build
+## MCP Configuration
 
-```bash
-npm run build
-npm start
-```
-
-## Test
-
-```bash
-npm run typecheck
-npm test
-```
-
-## Konfigurasi MCP (Cursor / Claude Desktop)
+### Claude Desktop / Claude Code
 
 ```json
 {
   "mcpServers": {
-    "fds-storybook": {
-      "command": "node",
-      "args": [
-        "/absolute/path/to/mcpstorybook/dist/index.js"
-      ],
+    "storybook": {
+      "command": "npx",
+      "args": ["-y", "@viantotech/mcp-storybook"],
       "env": {
-        "STORYBOOK_BASE_URL": "https://amt-fds-prod.vercel.app",
+        "STORYBOOK_BASE_URL": "https://your-storybook.example.com",
         "STORYBOOK_AUTH_TYPE": "basic",
-        "STORYBOOK_BASIC_AUTH_USERNAME": "${env:FDS_STORYBOOK_USER}",
-        "STORYBOOK_BASIC_AUTH_PASSWORD": "${env:FDS_STORYBOOK_PASS}",
-        "STORYBOOK_DISCOVERY_PATH": "/absolute/path/to/mcpstorybook/discovery-output.json"
+        "STORYBOOK_BASIC_AUTH_USERNAME": "your-username",
+        "STORYBOOK_BASIC_AUTH_PASSWORD": "your-password"
       }
     }
   }
 }
 ```
 
-Jangan commit kredensial. Prefer secret manager atau env lokal.
+### Cursor
+
+```json
+{
+  "mcpServers": {
+    "storybook": {
+      "command": "npx",
+      "args": ["-y", "@viantotech/mcp-storybook"],
+      "env": {
+        "STORYBOOK_BASE_URL": "https://your-storybook.example.com",
+        "STORYBOOK_AUTH_TYPE": "bearer",
+        "STORYBOOK_ACCESS_TOKEN": "your-token"
+      }
+    }
+  }
+}
+```
+
+### No Auth (Public Storybook)
+
+```json
+{
+  "mcpServers": {
+    "storybook": {
+      "command": "npx",
+      "args": ["-y", "@viantotech/mcp-storybook"],
+      "env": {
+        "STORYBOOK_BASE_URL": "https://your-public-storybook.example.com"
+      }
+    }
+  }
+}
+```
 
 ## Tools
 
-| Tool | Fungsi |
-|------|--------|
-| `list_stories` | Daftar story (metadata saja) |
-| `search_stories` | Pencarian full-text (upstream atau lokal) |
-| `get_story` | Story lengkap (+ `maxContentLength`) |
-| `get_story_section` | Satu section |
-| `get_story_metadata` | Metadata tanpa body penuh |
-| `get_story_context` | Konteks ringkas untuk pertanyaan NL |
-| `list_components` | Daftar komponen UI (Alert, Button, …) — grouped |
-| `get_component` | Detail satu komponen + docs + id variant story |
-| `get_component_config` | argTypes (variant, size, …) + daftar style preset + args |
+| Tool | Description |
+|------|-------------|
+| `list_stories` | List stories (metadata only) |
+| `search_stories` | Full-text search |
+| `get_story` | Full story content (+ `maxContentLength`) |
+| `get_story_section` | Single section |
+| `get_story_metadata` | Metadata without full body |
+| `get_story_context` | Concise context for NL questions |
+| `list_components` | List UI components (grouped) |
+| `get_component` | Component detail + docs + variant story IDs |
+| `get_component_config` | argTypes (variant, size, …) + style presets + args |
 
 ## Resources
 
@@ -103,11 +108,22 @@ Jangan commit kredensial. Prefer secret manager atau env lokal.
 - `storybook://story/{storyId}`
 - `storybook://story/{storyId}/section/{sectionId}`
 
+## Development
+
+```bash
+git clone https://github.com/viantotech/mcp-storybook.git
+cd mcp-storybook
+npm install
+npm run dev
+```
+
 ## Docker
 
 ```bash
-docker build -t fds-storybook-mcp .
-docker run --rm -i --env-file .env fds-storybook-mcp
+docker build -t mcp-storybook .
+docker run --rm -i -e STORYBOOK_BASE_URL=https://your-storybook.example.com mcp-storybook
 ```
 
-MCP stdio: `-i` wajib.
+## License
+
+MIT
