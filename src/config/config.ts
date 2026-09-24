@@ -24,6 +24,7 @@ const configSchema = z
     apiGetStory: z.string().optional(),
     apiSearch: z.string().optional(),
     dataSource: dataSourceSchema.default("auto"),
+    figmaMappingPath: z.string().optional(),
   })
   .superRefine((value, ctx) => {
     if (value.authType === "basic") {
@@ -81,6 +82,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     apiGetStory: env.STORYBOOK_API_GET_STORY,
     apiSearch: env.STORYBOOK_API_SEARCH,
     dataSource: env.STORYBOOK_DATA_SOURCE,
+    figmaMappingPath: env.STORYBOOK_FIGMA_MAPPING,
   });
 
   if (!parsed.success) {
