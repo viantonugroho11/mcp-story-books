@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0] - 2026-09-24
+
+### Added
+- `get_design_tokens` tool — extracts CSS custom properties from Storybook stylesheets and categorizes them (colors, spacing, typography, shadows, radius, breakpoints, motion, z-index). Implements ADR-002.
+- `get_component_dependencies` tool — builds a component dependency graph from CSF chunk source (imports + JSX composition) with configurable direction and depth. Implements ADR-003.
+- `map_figma_component` tool — maps Figma component names / URLs to Storybook components using explicit mapping files or convention-based matching with prop inference. Implements ADR-008.
+- `STORYBOOK_FIGMA_MAPPING` env var for pointing at an explicit Figma → Storybook mapping JSON file.
+- Tests for token extraction, dependency extraction, and Figma mapping.
+
 ## [0.1.0] - 2026-09-24
 
 ### Added

@@ -30,6 +30,7 @@ npx @viantotech/mcp-storybook
 | `STORYBOOK_CLIENT_SECRET` | If oauth | OAuth client secret |
 | `STORYBOOK_REFRESH_TOKEN` | If oauth | OAuth refresh token |
 | `STORYBOOK_DATA_SOURCE` | No | `auto` (default), `storybook-static`, `rest-api` |
+| `STORYBOOK_FIGMA_MAPPING` | No | Path to a JSON file with explicit Figma → Storybook component mappings |
 | `CACHE_ENABLED` | No | `true` (default) |
 | `CACHE_TTL` | No | Cache TTL in seconds (default: 300) |
 
@@ -101,6 +102,9 @@ npx @viantotech/mcp-storybook
 | `list_components` | List UI components (grouped) |
 | `get_component` | Component detail + docs + variant story IDs |
 | `get_component_config` | argTypes (variant, size, …) + style presets + args |
+| `get_design_tokens` | Extract design tokens (colors, spacing, typography, shadows, …) from CSS variables |
+| `get_component_dependencies` | Component dependency graph — dependencies and dependents |
+| `map_figma_component` | Map a Figma component name / URL to the matching Storybook component |
 
 ## Resources
 
