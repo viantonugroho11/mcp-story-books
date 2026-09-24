@@ -105,6 +105,9 @@ npx @viantotech/mcp-storybook
 | `get_design_tokens` | Extract design tokens (colors, spacing, typography, shadows, …) from CSS variables |
 | `get_component_dependencies` | Component dependency graph — dependencies and dependents |
 | `map_figma_component` | Map a Figma component name / URL to the matching Storybook component |
+| `find_stories_by_source_file` | Reverse lookup: source file path → matching stories |
+| `preview_story` | Build a Storybook iframe preview URL with custom args, globals, viewport |
+| `get_story_instructions` | Best-practice guide for writing CSF3 stories |
 
 ## Resources
 

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2026-09-24
+
+### Added
+- `find_stories_by_source_file` tool — reverse lookup from component source file path to matching Storybook stories (exact, basename, and fuzzy match tiers). Closes the gap with official Storybook MCP's `stories-find-by-component`.
+- `preview_story` tool — builds Storybook iframe preview URL with encoded args, globals, and viewport. Partial implementation of ADR-001 (URL-only mode).
+- `get_story_instructions` tool — returns best-practice CSF3 authoring guide (structure, argTypes, play functions, anti-patterns). Mirrors official Storybook MCP's `get-storybook-story-instructions`.
+- Tests for source lookup and preview URL construction.
+
 ## [0.2.0] - 2026-09-24
 
 ### Added
