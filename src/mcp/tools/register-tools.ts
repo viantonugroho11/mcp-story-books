@@ -2,17 +2,23 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { StoryService } from "../../services/story-service.js";
 import type { SearchService } from "../../services/search-service.js";
 import type { ComponentService } from "../../services/component-service.js";
+import type { TokenService } from "../../services/token-service.js";
+import type { DependencyService } from "../../services/dependency-service.js";
+import type { FigmaService } from "../../services/figma-service.js";
 import { logError, logInfo } from "../../logging/logger.js";
 import { StoryBookError } from "../../domain/errors.js";
 import {
   getComponentConfigInputSchema,
+  getComponentDependenciesInputSchema,
   getComponentInputSchema,
+  getDesignTokensInputSchema,
   getStoryContextInputSchema,
   getStoryInputSchema,
   getStoryMetadataInputSchema,
   getStorySectionInputSchema,
   listComponentsInputSchema,
   listStoriesInputSchema,
+  mapFigmaComponentInputSchema,
   searchStoriesInputSchema,
 } from "./schemas.js";
 
@@ -39,6 +45,9 @@ export function registerStoryTools(
   storyService: StoryService,
   searchService: SearchService,
   componentService: ComponentService,
+  tokenService?: TokenService,
+  dependencyService?: DependencyService,
+  figmaService?: FigmaService,
 ): void {
   server.registerTool(
     "list_stories",
@@ -238,6 +247,98 @@ export function registerStoryTools(
       }
     },
   );
+
+  if (tokenService) {
+    server.registerTool(
+      "get_design_tokens",
+      {
+        description:
+          "Extract design tokens (colors, spacing, typography, shadows, etc.) from Storybook CSS variables.",
+        inputSchema: getDesignTokensInputSchema.shape,
+      },
+      async (input) => {
+        const started = Date.now();
+        try {
+          const parsed = getDesignTokensInputSchema.parse(input);
+          const result = await tokenService.getDesignTokens({ category: parsed.category });
+          logInfo("tool_success", {
+            tool: "get_design_tokens",
+            durationMs: Date.now() - started,
+            count: result.totalCount,
+          });
+          return {
+            content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          };
+        } catch (error) {
+          logError("tool_error", { tool: "get_design_tokens", durationMs: Date.now() - started });
+          return toolError(error);
+        }
+      },
+    );
+  }
+
+  if (dependencyService) {
+    server.registerTool(
+      "get_component_dependencies",
+      {
+        description:
+          "Get component dependency graph: which components a component uses, and which components use it.",
+        inputSchema: getComponentDependenciesInputSchema.shape,
+      },
+      async (input) => {
+        const started = Date.now();
+        try {
+          const parsed = getComponentDependenciesInputSchema.parse(input);
+          const result = await dependencyService.getDependencies(parsed.componentName, {
+            direction: parsed.direction,
+            depth: parsed.depth,
+          });
+          logInfo("tool_success", {
+            tool: "get_component_dependencies",
+            component: parsed.componentName,
+            durationMs: Date.now() - started,
+          });
+          return {
+            content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          };
+        } catch (error) {
+          logError("tool_error", {
+            tool: "get_component_dependencies",
+            durationMs: Date.now() - started,
+          });
+          return toolError(error);
+        }
+      },
+    );
+  }
+
+  if (figmaService) {
+    server.registerTool(
+      "map_figma_component",
+      {
+        description:
+          "Map a Figma component name/node/URL to the corresponding Storybook component with suggested props.",
+        inputSchema: mapFigmaComponentInputSchema.shape,
+      },
+      async (input) => {
+        const started = Date.now();
+        try {
+          const parsed = mapFigmaComponentInputSchema.parse(input);
+          const result = await figmaService.mapFigmaComponent(parsed);
+          logInfo("tool_success", {
+            tool: "map_figma_component",
+            durationMs: Date.now() - started,
+          });
+          return {
+            content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          };
+        } catch (error) {
+          logError("tool_error", { tool: "map_figma_component", durationMs: Date.now() - started });
+          return toolError(error);
+        }
+      },
+    );
+  }
 
   server.registerTool(
     "get_story_context",

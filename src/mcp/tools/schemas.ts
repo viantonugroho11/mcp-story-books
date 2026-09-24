@@ -49,3 +49,32 @@ export const getComponentInputSchema = z.object({
 export const getComponentConfigInputSchema = z.object({
   component: z.string().min(1).max(200),
 });
+
+export const tokenCategorySchema = z.enum([
+  "colors",
+  "spacing",
+  "typography",
+  "breakpoints",
+  "shadows",
+  "radius",
+  "motion",
+  "z-index",
+  "other",
+  "all",
+]);
+
+export const getDesignTokensInputSchema = z.object({
+  category: tokenCategorySchema.optional(),
+});
+
+export const getComponentDependenciesInputSchema = z.object({
+  componentName: z.string().min(1).max(200),
+  direction: z.enum(["dependencies", "dependents", "both"]).optional(),
+  depth: z.number().int().min(1).max(5).optional(),
+});
+
+export const mapFigmaComponentInputSchema = z.object({
+  figmaName: z.string().min(1).max(500).optional(),
+  figmaNodeId: z.string().min(1).max(200).optional(),
+  figmaUrl: z.string().url().max(1000).optional(),
+});
