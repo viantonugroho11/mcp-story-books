@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { FigmaService } from "../../src/services/figma-service.js";
 import type { StoryRepository } from "../../src/repository/story-repository.js";
-import type { StoryListEntry } from "../../src/domain/story.js";
+import type { Story } from "../../src/domain/story.js";
 
-function makeRepo(entries: StoryListEntry[]): StoryRepository {
+function makeRepo(entries: Story[]): StoryRepository {
   return {
     async listStories() {
       return entries;
@@ -14,23 +14,26 @@ function makeRepo(entries: StoryListEntry[]): StoryRepository {
   } as unknown as StoryRepository;
 }
 
-const sampleEntries: StoryListEntry[] = [
+const sampleEntries: Story[] = [
   {
     id: "components-button--primary",
     title: "Components/Button / Primary",
     tags: [],
+    sections: [],
     metadata: { importPath: "./src/Button.stories.tsx" },
   },
   {
     id: "components-button--secondary",
     title: "Components/Button / Secondary Large",
     tags: [],
+    sections: [],
     metadata: { importPath: "./src/Button.stories.tsx" },
   },
   {
     id: "components-card--default",
     title: "Components/Card / Default",
     tags: [],
+    sections: [],
     metadata: { importPath: "./src/Card.stories.tsx" },
   },
 ];

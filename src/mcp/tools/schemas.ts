@@ -78,3 +78,21 @@ export const mapFigmaComponentInputSchema = z.object({
   figmaNodeId: z.string().min(1).max(200).optional(),
   figmaUrl: z.string().url().max(1000).optional(),
 });
+
+export const findStoriesBySourceFileInputSchema = z.object({
+  sourceFile: z.string().min(1).max(500),
+});
+
+export const previewStoryInputSchema = z.object({
+  storyId: z.string().min(1).max(200),
+  args: z.record(z.unknown()).optional(),
+  globals: z.record(z.unknown()).optional(),
+  viewport: z
+    .object({
+      width: z.number().int().min(1).max(10_000),
+      height: z.number().int().min(1).max(10_000),
+    })
+    .optional(),
+});
+
+export const getStoryInstructionsInputSchema = z.object({});

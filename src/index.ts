@@ -11,6 +11,9 @@ import { ComponentService } from "./services/component-service.js";
 import { TokenService } from "./services/token-service.js";
 import { DependencyService } from "./services/dependency-service.js";
 import { FigmaService } from "./services/figma-service.js";
+import { SourceLookupService } from "./services/source-lookup-service.js";
+import { PreviewService } from "./services/preview-service.js";
+import { InstructionsService } from "./services/instructions-service.js";
 import { StorybookChunkResolver } from "./storybook/chunk-resolver.js";
 import { createMcpServer } from "./mcp/server.js";
 import { logInfo } from "./logging/logger.js";
@@ -38,6 +41,10 @@ async function main(): Promise<void> {
   );
   const dependencyService = new DependencyService(repository, chunkResolver);
   const figmaService = new FigmaService(repository, config.figmaMappingPath);
+  const sourceLookupService = new SourceLookupService(repository);
+  const previewService = new PreviewService(repository, config.baseUrl);
+  const instructionsService = new InstructionsService();
+
   const server = createMcpServer(
     storyService,
     searchService,
@@ -45,6 +52,9 @@ async function main(): Promise<void> {
     tokenService,
     dependencyService,
     figmaService,
+    sourceLookupService,
+    previewService,
+    instructionsService,
   );
 
   const transport = new StdioServerTransport();

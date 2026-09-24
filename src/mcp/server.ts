@@ -7,6 +7,9 @@ import type { ComponentService } from "../services/component-service.js";
 import type { TokenService } from "../services/token-service.js";
 import type { DependencyService } from "../services/dependency-service.js";
 import type { FigmaService } from "../services/figma-service.js";
+import type { SourceLookupService } from "../services/source-lookup-service.js";
+import type { PreviewService } from "../services/preview-service.js";
+import type { InstructionsService } from "../services/instructions-service.js";
 
 export function createMcpServer(
   storyService: StoryService,
@@ -15,10 +18,13 @@ export function createMcpServer(
   tokenService?: TokenService,
   dependencyService?: DependencyService,
   figmaService?: FigmaService,
+  sourceLookupService?: SourceLookupService,
+  previewService?: PreviewService,
+  instructionsService?: InstructionsService,
 ): McpServer {
   const server = new McpServer({
     name: "mcp-storybook",
-    version: "0.1.0",
+    version: "0.3.0",
   });
 
   registerStoryTools(
@@ -29,6 +35,9 @@ export function createMcpServer(
     tokenService,
     dependencyService,
     figmaService,
+    sourceLookupService,
+    previewService,
+    instructionsService,
   );
   registerStoryResources(server, storyService);
 

@@ -5,20 +5,26 @@ import type { ComponentService } from "../../services/component-service.js";
 import type { TokenService } from "../../services/token-service.js";
 import type { DependencyService } from "../../services/dependency-service.js";
 import type { FigmaService } from "../../services/figma-service.js";
+import type { SourceLookupService } from "../../services/source-lookup-service.js";
+import type { PreviewService } from "../../services/preview-service.js";
+import type { InstructionsService } from "../../services/instructions-service.js";
 import { logError, logInfo } from "../../logging/logger.js";
 import { StoryBookError } from "../../domain/errors.js";
 import {
+  findStoriesBySourceFileInputSchema,
   getComponentConfigInputSchema,
   getComponentDependenciesInputSchema,
   getComponentInputSchema,
   getDesignTokensInputSchema,
   getStoryContextInputSchema,
   getStoryInputSchema,
+  getStoryInstructionsInputSchema,
   getStoryMetadataInputSchema,
   getStorySectionInputSchema,
   listComponentsInputSchema,
   listStoriesInputSchema,
   mapFigmaComponentInputSchema,
+  previewStoryInputSchema,
   searchStoriesInputSchema,
 } from "./schemas.js";
 
@@ -48,6 +54,9 @@ export function registerStoryTools(
   tokenService?: TokenService,
   dependencyService?: DependencyService,
   figmaService?: FigmaService,
+  sourceLookupService?: SourceLookupService,
+  previewService?: PreviewService,
+  instructionsService?: InstructionsService,
 ): void {
   server.registerTool(
     "list_stories",
@@ -334,6 +343,97 @@ export function registerStoryTools(
           };
         } catch (error) {
           logError("tool_error", { tool: "map_figma_component", durationMs: Date.now() - started });
+          return toolError(error);
+        }
+      },
+    );
+  }
+
+  if (sourceLookupService) {
+    server.registerTool(
+      "find_stories_by_source_file",
+      {
+        description:
+          "Reverse lookup: given a component source file path, find matching Storybook stories.",
+        inputSchema: findStoriesBySourceFileInputSchema.shape,
+      },
+      async (input) => {
+        const started = Date.now();
+        try {
+          const parsed = findStoriesBySourceFileInputSchema.parse(input);
+          const result = await sourceLookupService.findStoriesBySourceFile(parsed.sourceFile);
+          logInfo("tool_success", {
+            tool: "find_stories_by_source_file",
+            durationMs: Date.now() - started,
+            count: result.matches.length,
+          });
+          return {
+            content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          };
+        } catch (error) {
+          logError("tool_error", {
+            tool: "find_stories_by_source_file",
+            durationMs: Date.now() - started,
+          });
+          return toolError(error);
+        }
+      },
+    );
+  }
+
+  if (previewService) {
+    server.registerTool(
+      "preview_story",
+      {
+        description:
+          "Build a Storybook iframe preview URL for a story with optional args, globals, and viewport.",
+        inputSchema: previewStoryInputSchema.shape,
+      },
+      async (input) => {
+        const started = Date.now();
+        try {
+          const parsed = previewStoryInputSchema.parse(input);
+          const result = await previewService.previewStory(parsed);
+          logInfo("tool_success", {
+            tool: "preview_story",
+            storyId: parsed.storyId,
+            durationMs: Date.now() - started,
+          });
+          return {
+            content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          };
+        } catch (error) {
+          logError("tool_error", { tool: "preview_story", durationMs: Date.now() - started });
+          return toolError(error);
+        }
+      },
+    );
+  }
+
+  if (instructionsService) {
+    server.registerTool(
+      "get_story_instructions",
+      {
+        description:
+          "Get best-practice instructions for writing Storybook stories (CSF3, argTypes, play functions).",
+        inputSchema: getStoryInstructionsInputSchema.shape,
+      },
+      async () => {
+        const started = Date.now();
+        try {
+          const result = instructionsService.getInstructions();
+          logInfo("tool_success", {
+            tool: "get_story_instructions",
+            durationMs: Date.now() - started,
+          });
+          return {
+            content: [{ type: "text", text: result.content }],
+          };
+        } catch (error) {
+          logError("tool_error", {
+            tool: "get_story_instructions",
+            durationMs: Date.now() - started,
+          });
           return toolError(error);
         }
       },
