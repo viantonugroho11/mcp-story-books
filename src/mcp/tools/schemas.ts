@@ -96,3 +96,15 @@ export const previewStoryInputSchema = z.object({
 });
 
 export const getStoryInstructionsInputSchema = z.object({});
+
+export const getComponentUsageInputSchema = z.object({
+  componentName: z.string().min(1).max(200),
+  variant: z.string().min(1).max(200).optional(),
+  format: z.enum(["tsx", "jsx"]).optional(),
+});
+
+export const compareVersionsInputSchema = z.object({
+  baseUrl: z.string().url().max(500),
+  targetUrl: z.string().url().max(500).optional(),
+  components: z.array(z.string().min(1).max(200)).max(100).optional(),
+});

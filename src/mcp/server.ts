@@ -10,6 +10,8 @@ import type { FigmaService } from "../services/figma-service.js";
 import type { SourceLookupService } from "../services/source-lookup-service.js";
 import type { PreviewService } from "../services/preview-service.js";
 import type { InstructionsService } from "../services/instructions-service.js";
+import type { UsageService } from "../services/usage-service.js";
+import type { CompareService } from "../services/compare-service.js";
 
 export function createMcpServer(
   storyService: StoryService,
@@ -21,10 +23,12 @@ export function createMcpServer(
   sourceLookupService?: SourceLookupService,
   previewService?: PreviewService,
   instructionsService?: InstructionsService,
+  usageService?: UsageService,
+  compareService?: CompareService,
 ): McpServer {
   const server = new McpServer({
     name: "mcp-storybook",
-    version: "0.3.0",
+    version: "0.4.0",
   });
 
   registerStoryTools(
@@ -38,6 +42,8 @@ export function createMcpServer(
     sourceLookupService,
     previewService,
     instructionsService,
+    usageService,
+    compareService,
   );
   registerStoryResources(server, storyService);
 

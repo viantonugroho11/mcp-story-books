@@ -8,13 +8,17 @@ import type { FigmaService } from "../../services/figma-service.js";
 import type { SourceLookupService } from "../../services/source-lookup-service.js";
 import type { PreviewService } from "../../services/preview-service.js";
 import type { InstructionsService } from "../../services/instructions-service.js";
+import type { UsageService } from "../../services/usage-service.js";
+import type { CompareService } from "../../services/compare-service.js";
 import { logError, logInfo } from "../../logging/logger.js";
 import { StoryBookError } from "../../domain/errors.js";
 import {
+  compareVersionsInputSchema,
   findStoriesBySourceFileInputSchema,
   getComponentConfigInputSchema,
   getComponentDependenciesInputSchema,
   getComponentInputSchema,
+  getComponentUsageInputSchema,
   getDesignTokensInputSchema,
   getStoryContextInputSchema,
   getStoryInputSchema,
@@ -57,6 +61,8 @@ export function registerStoryTools(
   sourceLookupService?: SourceLookupService,
   previewService?: PreviewService,
   instructionsService?: InstructionsService,
+  usageService?: UsageService,
+  compareService?: CompareService,
 ): void {
   server.registerTool(
     "list_stories",
@@ -434,6 +440,67 @@ export function registerStoryTools(
             tool: "get_story_instructions",
             durationMs: Date.now() - started,
           });
+          return toolError(error);
+        }
+      },
+    );
+  }
+
+  if (usageService) {
+    server.registerTool(
+      "get_component_usage",
+      {
+        description:
+          "Get copy-paste-ready component usage code (import + JSX) built from story argTypes and preset args.",
+        inputSchema: getComponentUsageInputSchema.shape,
+      },
+      async (input) => {
+        const started = Date.now();
+        try {
+          const parsed = getComponentUsageInputSchema.parse(input);
+          const result = await usageService.getComponentUsage(parsed);
+          logInfo("tool_success", {
+            tool: "get_component_usage",
+            component: parsed.componentName,
+            durationMs: Date.now() - started,
+          });
+          return {
+            content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          };
+        } catch (error) {
+          logError("tool_error", {
+            tool: "get_component_usage",
+            durationMs: Date.now() - started,
+          });
+          return toolError(error);
+        }
+      },
+    );
+  }
+
+  if (compareService) {
+    server.registerTool(
+      "compare_versions",
+      {
+        description:
+          "Compare two Storybook deployments and return structured diff (added/removed/modified components, prop changes).",
+        inputSchema: compareVersionsInputSchema.shape,
+      },
+      async (input) => {
+        const started = Date.now();
+        try {
+          const parsed = compareVersionsInputSchema.parse(input);
+          const result = await compareService.compareVersions(parsed);
+          logInfo("tool_success", {
+            tool: "compare_versions",
+            durationMs: Date.now() - started,
+            changes: result.changes.length,
+          });
+          return {
+            content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          };
+        } catch (error) {
+          logError("tool_error", { tool: "compare_versions", durationMs: Date.now() - started });
           return toolError(error);
         }
       },

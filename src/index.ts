@@ -14,6 +14,8 @@ import { FigmaService } from "./services/figma-service.js";
 import { SourceLookupService } from "./services/source-lookup-service.js";
 import { PreviewService } from "./services/preview-service.js";
 import { InstructionsService } from "./services/instructions-service.js";
+import { UsageService } from "./services/usage-service.js";
+import { CompareService } from "./services/compare-service.js";
 import { StorybookChunkResolver } from "./storybook/chunk-resolver.js";
 import { createMcpServer } from "./mcp/server.js";
 import { logInfo } from "./logging/logger.js";
@@ -44,6 +46,8 @@ async function main(): Promise<void> {
   const sourceLookupService = new SourceLookupService(repository);
   const previewService = new PreviewService(repository, config.baseUrl);
   const instructionsService = new InstructionsService();
+  const usageService = new UsageService(componentService, repository);
+  const compareService = new CompareService(config, repository, componentService);
 
   const server = createMcpServer(
     storyService,
@@ -55,6 +59,8 @@ async function main(): Promise<void> {
     sourceLookupService,
     previewService,
     instructionsService,
+    usageService,
+    compareService,
   );
 
   const transport = new StdioServerTransport();
