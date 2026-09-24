@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2026-09-24
+
+### Added
+- `get_component_usage` tool — copy-paste-ready component usage (import + JSX) built from story argTypes and preset args. Selects a variant by name or defaults to the first preset. Implements ADR-005.
+- `compare_versions` tool — structured diff between two Storybook deployments (added/removed components, variant changes, argType changes). Reuses the current auth config for the target when only `baseUrl` is supplied. Implements ADR-004.
+- ADR-009 (source file reverse lookup) — retrospective ADR for the v0.3.0 `find_stories_by_source_file` tool.
+- ADR-010 (story authoring instructions) — retrospective ADR for the v0.3.0 `get_story_instructions` tool.
+- ADR-011, ADR-012, ADR-013 — record rejection rationale for `stories-changed`, `test-run`, and `review-create` (out of scope for a deployed-Storybook reader).
+- Tests for `UsageService`.
+
 ## [0.3.0] - 2026-09-24
 
 ### Added

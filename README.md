@@ -108,6 +108,8 @@ npx @viantotech/mcp-storybook
 | `find_stories_by_source_file` | Reverse lookup: source file path → matching stories |
 | `preview_story` | Build a Storybook iframe preview URL with custom args, globals, viewport |
 | `get_story_instructions` | Best-practice guide for writing CSF3 stories |
+| `get_component_usage` | Copy-paste-ready component usage (import + JSX) built from story presets |
+| `compare_versions` | Structured diff between two Storybook deployments |
 
 ## Resources
 
