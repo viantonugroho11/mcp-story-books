@@ -131,8 +131,8 @@ npx @viantotech/mcp-storybook
 ## Development
 
 ```bash
-git clone https://github.com/viantotech/mcp-storybook.git
-cd mcp-storybook
+git clone https://github.com/viantonugroho11/mcp-story-books.git
+cd mcp-story-books
 npm install
 npm run dev
 ```
