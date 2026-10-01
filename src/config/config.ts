@@ -25,6 +25,8 @@ const configSchema = z
     apiSearch: z.string().optional(),
     dataSource: dataSourceSchema.default("auto"),
     figmaMappingPath: z.string().optional(),
+    localMemoryPath: z.string().default(".storybook-mcp/memory.json"),
+    localMemoryStaleDays: z.coerce.number().int().positive().default(30),
   })
   .superRefine((value, ctx) => {
     if (value.authType === "basic") {
@@ -83,6 +85,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     apiSearch: env.STORYBOOK_API_SEARCH,
     dataSource: env.STORYBOOK_DATA_SOURCE,
     figmaMappingPath: env.STORYBOOK_FIGMA_MAPPING,
+    localMemoryPath: env.STORYBOOK_LOCAL_MEMORY,
+    localMemoryStaleDays: env.STORYBOOK_LOCAL_MEMORY_STALE_DAYS,
   });
 
   if (!parsed.success) {

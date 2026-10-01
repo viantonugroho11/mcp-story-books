@@ -31,6 +31,8 @@ npx @viantotech/mcp-storybook
 | `STORYBOOK_REFRESH_TOKEN` | If oauth | OAuth refresh token |
 | `STORYBOOK_DATA_SOURCE` | No | `auto` (default), `storybook-static`, `rest-api` |
 | `STORYBOOK_FIGMA_MAPPING` | No | Path to a JSON file with explicit Figma → Storybook component mappings |
+| `STORYBOOK_LOCAL_MEMORY` | No | Path of the local pending-component memory file (default `.storybook-mcp/memory.json`), or `off` to disable |
+| `STORYBOOK_LOCAL_MEMORY_STALE_DAYS` | No | Days before a pending component is flagged stale (default: 30) |
 | `CACHE_ENABLED` | No | `true` (default) |
 | `CACHE_TTL` | No | Cache TTL in seconds (default: 300) |
 
@@ -110,6 +112,15 @@ npx @viantotech/mcp-storybook
 | `get_story_instructions` | Best-practice guide for writing CSF3 stories |
 | `get_component_usage` | Copy-paste-ready component usage (import + JSX) built from story presets |
 | `compare_versions` | Structured diff between two Storybook deployments |
+| `get_catalog_summary` | Compact catalog of all components (import, short description, key props) — call before writing UI |
+| `validate_usage` | Check JSX against argTypes: unknown components/props, invalid enum values, missing required props |
+| `find_token_drift` | Find hardcoded colors/spacing/radius/font sizes that match design tokens, with `var(--token)` replacements |
+| `scaffold_story` | Generate a CSF3 story for a new component that follows this Storybook's conventions |
+| `remember_component` | Record a component that exists in code but is not deployed to Storybook yet |
+| `list_pending_components` | List locally remembered components (auto-dropped once deployed) |
+| `forget_component` | Remove a component from local memory |
+
+> `remember_component` and `scaffold_story` write to the local memory file only. The Storybook deployment is never modified.
 
 ## Resources
 

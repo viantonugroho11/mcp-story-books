@@ -16,6 +16,11 @@ import { PreviewService } from "./services/preview-service.js";
 import { InstructionsService } from "./services/instructions-service.js";
 import { UsageService } from "./services/usage-service.js";
 import { CompareService } from "./services/compare-service.js";
+import { CatalogService } from "./services/catalog-service.js";
+import { ValidationService } from "./services/validation-service.js";
+import { DriftService } from "./services/drift-service.js";
+import { ScaffoldService } from "./services/scaffold-service.js";
+import { MemoryService } from "./services/memory-service.js";
 import { StorybookChunkResolver } from "./storybook/chunk-resolver.js";
 import { createMcpServer } from "./mcp/server.js";
 import { logInfo } from "./logging/logger.js";
@@ -48,6 +53,19 @@ async function main(): Promise<void> {
   const instructionsService = new InstructionsService();
   const usageService = new UsageService(componentService, repository);
   const compareService = new CompareService(config, repository, componentService);
+  const memoryService =
+    config.localMemoryPath.toLowerCase() === "off"
+      ? undefined
+      : new MemoryService(config.localMemoryPath, config.localMemoryStaleDays);
+  const catalogService = new CatalogService(componentService, usageService, memoryService);
+  const validationService = new ValidationService(catalogService);
+  const driftService = new DriftService(tokenService);
+  const scaffoldService = new ScaffoldService(
+    componentService,
+    repository,
+    chunkResolver,
+    memoryService,
+  );
 
   const server = createMcpServer(
     storyService,
@@ -61,6 +79,7 @@ async function main(): Promise<void> {
     instructionsService,
     usageService,
     compareService,
+    { catalogService, validationService, driftService, scaffoldService, memoryService },
   );
 
   const transport = new StdioServerTransport();

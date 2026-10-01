@@ -43,10 +43,12 @@
     "node": ">=20"
   },
   "dependencies": {
+    "@babel/parser": "^7.29.9",
     "@modelcontextprotocol/sdk": "^1.30.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@babel/types": "^8.0.6",
     "@types/node": "^22.13.10",
     "dotenv": "^16.4.7",
     "tsx": "^4.19.3",

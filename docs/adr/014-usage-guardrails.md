@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Accepted — implemented, unreleased
 
 ## Date
 

@@ -65,7 +65,7 @@ export class UsageService {
     };
   }
 
-  private async inferImportPath(component: string, resolvedName: string): Promise<string> {
+  async inferImportPath(component: string, resolvedName: string): Promise<string> {
     const entries = await this.repository.listStories({ limit: 1000 });
 
     for (const entry of entries) {

@@ -10,11 +10,23 @@ import type { PreviewService } from "../../services/preview-service.js";
 import type { InstructionsService } from "../../services/instructions-service.js";
 import type { UsageService } from "../../services/usage-service.js";
 import type { CompareService } from "../../services/compare-service.js";
+import type { CatalogService } from "../../services/catalog-service.js";
+import type { ValidationService } from "../../services/validation-service.js";
+import type { DriftService } from "../../services/drift-service.js";
+import type { ScaffoldService } from "../../services/scaffold-service.js";
+import type { MemoryService } from "../../services/memory-service.js";
 import { logError, logInfo } from "../../logging/logger.js";
 import { StoryBookError } from "../../domain/errors.js";
 import {
   compareVersionsInputSchema,
   findStoriesBySourceFileInputSchema,
+  findTokenDriftInputSchema,
+  forgetComponentInputSchema,
+  getCatalogSummaryInputSchema,
+  listPendingComponentsInputSchema,
+  rememberComponentInputSchema,
+  scaffoldStoryInputSchema,
+  validateUsageInputSchema,
   getComponentConfigInputSchema,
   getComponentDependenciesInputSchema,
   getComponentInputSchema,
@@ -50,6 +62,30 @@ function toolError(error: unknown): { content: [{ type: "text"; text: string }];
   };
 }
 
+export interface GuardrailServices {
+  catalogService?: CatalogService;
+  validationService?: ValidationService;
+  driftService?: DriftService;
+  scaffoldService?: ScaffoldService;
+  memoryService?: MemoryService;
+}
+
+type ToolResult =
+  | { content: [{ type: "text"; text: string }] }
+  | { content: [{ type: "text"; text: string }]; isError: true };
+
+async function runTool(tool: string, fn: () => Promise<unknown>): Promise<ToolResult> {
+  const started = Date.now();
+  try {
+    const result = await fn();
+    logInfo("tool_success", { tool, durationMs: Date.now() - started });
+    return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+  } catch (error) {
+    logError("tool_error", { tool, durationMs: Date.now() - started });
+    return toolError(error);
+  }
+}
+
 export function registerStoryTools(
   server: McpServer,
   storyService: StoryService,
@@ -63,6 +99,7 @@ export function registerStoryTools(
   instructionsService?: InstructionsService,
   usageService?: UsageService,
   compareService?: CompareService,
+  guardrails: GuardrailServices = {},
 ): void {
   server.registerTool(
     "list_stories",
@@ -507,6 +544,8 @@ export function registerStoryTools(
     );
   }
 
+  registerGuardrailTools(server, guardrails, componentService);
+
   server.registerTool(
     "get_story_context",
     {
@@ -535,4 +574,116 @@ export function registerStoryTools(
       }
     },
   );
+}
+
+function registerGuardrailTools(
+  server: McpServer,
+  services: GuardrailServices,
+  componentService: ComponentService,
+): void {
+  const { catalogService, validationService, driftService, scaffoldService, memoryService } = services;
+
+  if (catalogService) {
+    server.registerTool(
+      "get_catalog_summary",
+      {
+        description:
+          "Call BEFORE writing any UI code: compact catalog of every design-system component (name, import, short description, key props). Use it to reuse existing components instead of building new ones. Entries marked source=pending exist in code but are not in Storybook yet.",
+        inputSchema: getCatalogSummaryInputSchema.shape,
+      },
+      (input) =>
+        runTool("get_catalog_summary", () =>
+          catalogService.getCatalogSummary(getCatalogSummaryInputSchema.parse(input)),
+        ),
+    );
+  }
+
+  if (validationService) {
+    server.registerTool(
+      "validate_usage",
+      {
+        description:
+          "Call AFTER writing JSX/TSX that uses design-system components: checks component names, props, and enum values against Storybook argTypes and reports invalid usage with suggestions.",
+        inputSchema: validateUsageInputSchema.shape,
+      },
+      (input) =>
+        runTool("validate_usage", () =>
+          validationService.validateUsage(validateUsageInputSchema.parse(input).code),
+        ),
+    );
+  }
+
+  if (driftService) {
+    server.registerTool(
+      "find_token_drift",
+      {
+        description:
+          "Find hardcoded colors, spacing, radius, and font sizes in CSS/JSX that match design tokens, with var(--token) replacements. Near matches (tolerance > 0) are hints only.",
+        inputSchema: findTokenDriftInputSchema.shape,
+      },
+      (input) =>
+        runTool("find_token_drift", () =>
+          driftService.findTokenDrift(findTokenDriftInputSchema.parse(input)),
+        ),
+    );
+  }
+
+  if (scaffoldService) {
+    server.registerTool(
+      "scaffold_story",
+      {
+        description:
+          "Call after creating a new component: generates a CSF3 *.stories.tsx file that follows this Storybook's conventions, and remembers the component locally so other tools see it before Storybook is redeployed. Returns file content only; write it yourself.",
+        inputSchema: scaffoldStoryInputSchema.shape,
+      },
+      (input) =>
+        runTool("scaffold_story", () =>
+          scaffoldService.scaffoldStory(scaffoldStoryInputSchema.parse(input)),
+        ),
+    );
+  }
+
+  if (memoryService) {
+    const deployedNames = async () =>
+      (await componentService.listComponents({ limit: 200 })).map((c) => c.name);
+
+    server.registerTool(
+      "remember_component",
+      {
+        description:
+          "Record a component that exists in code but is not yet in the deployed Storybook, so catalog and validation tools include it. Stored in a local file only.",
+        inputSchema: rememberComponentInputSchema.shape,
+      },
+      (input) =>
+        runTool("remember_component", async () => ({
+          stored: true,
+          entry: await memoryService.remember(rememberComponentInputSchema.parse(input)),
+        })),
+    );
+
+    server.registerTool(
+      "list_pending_components",
+      {
+        description:
+          "List locally remembered components not yet in the deployed Storybook. Entries now present in Storybook are dropped automatically; old entries are flagged stale.",
+        inputSchema: listPendingComponentsInputSchema.shape,
+      },
+      () =>
+        runTool("list_pending_components", async () => ({
+          components: await memoryService.list(await deployedNames()),
+        })),
+    );
+
+    server.registerTool(
+      "forget_component",
+      {
+        description: "Remove a component from local pending-component memory.",
+        inputSchema: forgetComponentInputSchema.shape,
+      },
+      (input) =>
+        runTool("forget_component", async () => ({
+          removed: await memoryService.forget(forgetComponentInputSchema.parse(input).componentName),
+        })),
+    );
+  }
 }
