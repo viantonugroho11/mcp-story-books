@@ -15,10 +15,10 @@
 | [011](011-change-detection.md) | Change Detection | **Rejected** — out of scope | — |
 | [012](012-test-runner.md) | Test Runner Integration | **Rejected** — out of scope | — |
 | [013](013-review-creation.md) | Review Creation | **Rejected** — vendor-specific | — |
-| [014](014-usage-guardrails.md) | Usage Guardrails | Accepted | Unreleased |
-| [015](015-token-drift-detector.md) | Design Token Drift Detector | Accepted | Unreleased |
-| [016](016-story-scaffolding.md) | Story Scaffolding | Accepted | Unreleased |
-| [017](017-local-component-memory.md) | Local Component Memory | Accepted | Unreleased |
+| [014](014-usage-guardrails.md) | Usage Guardrails | Accepted | v0.5.0 |
+| [015](015-token-drift-detector.md) | Design Token Drift Detector | Accepted | v0.5.0 |
+| [016](016-story-scaffolding.md) | Story Scaffolding | Accepted | v0.5.0 |
+| [017](017-local-component-memory.md) | Local Component Memory | Accepted | v0.5.0 |
 
 ## Feature Parity vs Official Storybook MCP
 

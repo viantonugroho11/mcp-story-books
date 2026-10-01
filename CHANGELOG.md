@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - 2026-10-01
+
+### Added
+- `get_catalog_summary` tool — compact, token-cheap catalog of every component (import, truncated description, enum/boolean key props) so agents reuse existing components instead of building new ones. Implements ADR-014.
+- `validate_usage` tool — checks agent-written JSX/TSX against Storybook argTypes: unknown components, unknown props (with closest-match suggestions), invalid enum values, string-for-boolean props, and missing required props. Resolves aliased imports; skips dynamic values; reports components without argTypes as `unvalidated`. Implements ADR-014.
+- `find_token_drift` tool — finds hardcoded colors (hex/rgb/hsl), spacing, radius, and font sizes that match design tokens, with `var(--token)` replacements. Resolves `var()` token chains; optional ΔE / px tolerance for near matches. Implements ADR-015.
+- `scaffold_story` tool — generates a CSF3 `*.stories.tsx` from a component's TypeScript props, mirroring title prefix, `autodocs` tag, and decorators of a reference component. Returns content only. Implements ADR-016.
+- `remember_component`, `list_pending_components`, `forget_component` tools — local file-backed memory of components not yet deployed to Storybook; merged into catalog and validation, auto-dropped once deployed, flagged stale after a configurable age. Implements ADR-017.
+- `STORYBOOK_LOCAL_MEMORY` (path or `off`) and `STORYBOOK_LOCAL_MEMORY_STALE_DAYS` env vars.
+- Shared JSX/TypeScript analyzer built on `@babel/parser`.
+- ADR-014..017 and tests for all new services.
+
 ## [0.4.0] - 2026-09-24
 
 ### Added
