@@ -6,3 +6,4 @@ coverage/
 *.log
 discovery-output.json
 .DS_Store
+.storybook-mcp/

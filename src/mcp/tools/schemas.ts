@@ -108,3 +108,46 @@ export const compareVersionsInputSchema = z.object({
   targetUrl: z.string().url().max(500).optional(),
   components: z.array(z.string().min(1).max(200)).max(100).optional(),
 });
+
+export const getCatalogSummaryInputSchema = z.object({
+  category: z.string().min(1).max(200).optional(),
+  maxDescriptionLength: z.number().int().min(0).max(1000).optional(),
+});
+
+export const validateUsageInputSchema = z.object({
+  code: z.string().min(1).max(200_000),
+});
+
+export const findTokenDriftInputSchema = z.object({
+  code: z.string().min(1).max(200_000),
+  filename: z.string().max(500).optional(),
+  categories: z
+    .array(z.enum(["colors", "spacing", "typography", "shadows", "radius"]))
+    .max(5)
+    .optional(),
+  tolerance: z.number().min(0).max(100).optional(),
+  remBase: z.number().positive().max(100).optional(),
+});
+
+export const scaffoldStoryInputSchema = z.object({
+  componentName: z.string().min(1).max(200).regex(/^[A-Z][A-Za-z0-9_]*$/),
+  componentSource: z.string().min(1).max(200_000),
+  title: z.string().min(1).max(300).optional(),
+  referenceComponent: z.string().min(1).max(200).optional(),
+  importPath: z.string().min(1).max(500).optional(),
+  description: z.string().max(2000).optional(),
+});
+
+export const rememberComponentInputSchema = z.object({
+  componentName: z.string().min(1).max(200).regex(/^[A-Z][A-Za-z0-9_]*$/),
+  import: z.string().min(1).max(500),
+  description: z.string().max(2000),
+  componentSource: z.string().max(200_000).optional(),
+  sourcePath: z.string().max(500).optional(),
+});
+
+export const listPendingComponentsInputSchema = z.object({});
+
+export const forgetComponentInputSchema = z.object({
+  componentName: z.string().min(1).max(200),
+});
